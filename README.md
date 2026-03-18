@@ -51,6 +51,8 @@ bash
 [仓库地址](https://github.com/lliangzeyuan-wq/campus_social)  
 团队成员可通过 git clone 拉取代码，开发后提交到仓库  
 建议创建功能分支开发，完成后合并到主分支  
+### 开发/测试环境
+linux(我现在用的是ubuntu虚拟机+vscode开发,仅供参考)
 ### 备注  
 本项目为校园课程作业，适合学习 Socket 网络编程、多线程服务端开发及团队协作流程。
 
