@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聊天 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="chat-container">
+            <!-- 聊天头部 -->
+            <div class="chat-header">
+                <button class="back-btn" onclick="goBack()">‹</button>
+                <div class="user-avatar" id="chat-avatar">?</div>
+                <div class="chat-header-info">
+                    <div class="chat-header-name" id="chat-name">加载中...</div>
+                    <div class="chat-header-status" id="chat-status">在线</div>
+                </div>
+            </div>
+            
+            <!-- 消息列表 -->
+            <div class="chat-messages" id="message-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+            
+            <!-- 输入区域 -->
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="message-input" placeholder="输入消息..." maxlength="500">
+                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        checkLogin();
+        
+        let currentUserId = null;
+        let targetUserId = null;
+        let targetUserName = '';
+        let wsConnection = null;
+        let messages = [];
+        
+        // 获取URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        targetUserId = urlParams.get('userId');
+        targetUserName = decodeURIComponent(urlParams.get('name') || '未知用户');
+        
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        currentUserId = userInfo.id;
+        
+        function init() {
+            if (!targetUserId) {
+                showToast('参数错误');
+                setTimeout(() => history.back(), 1000);
+                return;
+            }
+            
+            document.getElementById('chat-name').textContent = targetUserName;
+            document.getElementById('chat-avatar').textContent = targetUserName[0] || '?';
+            
+            loadMessages();
+            initWebSocket();
+            
+            // 回车发送
+            document.getElementById('message-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // 定时刷新消息
+            setInterval(loadMessages, 5000);
+        }
+        
+        async function loadMessages() {
+            try {
+                const res = await api.getMessages(targetUserId);
+                if (res.success) {
+                    messages = res.data || [];
+                    renderMessages();
+                }
+            } catch (e) {
+                console.log('加载消息失败');
+            }
+        }
+        
+        function renderMessages() {
+            const listEl = document.getElementById('message-list');
+            
+            if (messages.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">💬</div>
+                        <div class="empty-text">开始聊天吧</div>
+                        <div class="empty-hint">打个招呼，认识一下新朋友</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            listEl.innerHTML = messages.map(msg => {
+                const isSent = msg.fromId === currentUserId;
+                return `
+                    <div class="chat-message ${isSent ? 'sent' : 'received'}">
+                        <div class="chat-message-content">${escapeHtml(msg.content)}</div>
+                        <div class="chat-message-time">${formatTime(msg.time)}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            // 滚动到底部
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            input.value = '';
+            
+            // 乐观更新
+            messages.push({
+                fromId: currentUserId,
+                content: content,
+                time: new Date().toISOString()
+            });
+            renderMessages();
+            
+            try {
+                const res = await api.sendMessage(targetUserId, content);
+                if (!res.success) {
+                    showToast('发送失败');
+                }
+            } catch (e) {
+                showToast('网络错误');
+            }
+        }
+        
+        function initWebSocket() {
+            // WebSocket 连接（如后端支持）
+            // 这里使用轮询作为备选方案
+        }
+        
+        function goBack() {
+            window.location.href = 'messages.html';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatTime(time) {
+            if (!time) return '';
+            const date = new Date(time);
+            return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        init();
+    </script>
+</body>
+</html>

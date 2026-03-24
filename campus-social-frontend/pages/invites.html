@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>交友邀请 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .invite-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .invite-header-top {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .invite-header h1 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .back-btn {
+            width: 2rem;
+            height: 2rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .invite-tabs {
+            display: flex;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .invite-tab {
+            flex: 1;
+            padding: 0.875rem;
+            text-align: center;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .invite-tab.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .invite-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            right: 25%;
+            height: 2px;
+            background: var(--primary-color);
+        }
+        
+        .invite-content {
+            padding: 1rem;
+            padding-bottom: 5rem;
+        }
+        
+        .invite-list {
+            display: none;
+        }
+        
+        .invite-list.active {
+            display: block;
+        }
+        
+        .invite-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+        
+        .invite-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .invite-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .invite-info {
+            flex: 1;
+        }
+        
+        .invite-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+        
+        .invite-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.125rem;
+        }
+        
+        .invite-type-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+        }
+        
+        .invite-type-badge.study { background: rgba(34, 197, 94, 0.1); color: var(--success-color); }
+        .invite-type-badge.kaoyan { background: rgba(99, 102, 241, 0.1); color: var(--primary-color); }
+        .invite-type-badge.friend { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+        .invite-type-badge.love { background: rgba(236, 72, 153, 0.1); color: var(--secondary-color); }
+        
+        .invite-message {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+        
+        .invite-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .invite-actions .btn {
+            flex: 1;
+        }
+        
+        .invite-status {
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .invite-status.accepted {
+            color: var(--success-color);
+        }
+        
+        .invite-status.rejected {
+            color: var(--danger-color);
+        }
+        
+        .invite-status.pending {
+            color: var(--warning-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="invite-header">
+            <div class="invite-header-top">
+                <button class="back-btn" onclick="history.back()">‹</button>
+                <h1>交友邀请</h1>
+                <div style="width: 2rem;"></div>
+            </div>
+        </div>
+        
+        <div class="invite-tabs">
+            <div class="invite-tab active" onclick="switchTab('received')">
+                收到的邀请
+                <span id="received-badge" style="display: none;"></span>
+            </div>
+            <div class="invite-tab" onclick="switchTab('sent')">发出的邀请</div>
+        </div>
+        
+        <div class="invite-content">
+            <!-- 收到的邀请 -->
+            <div class="invite-list active" id="received-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+            
+            <!-- 发出的邀请 -->
+            <div class="invite-list" id="sent-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 确认模态框 -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">确认操作</div>
+            </div>
+            <div class="modal-body" id="modal-body">确定要接受这个邀请吗？</div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+                <button class="modal-btn confirm" id="modal-confirm" onclick="confirmAction()">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        checkLogin();
+        
+        let currentTab = 'received';
+        let pendingAction = null;
+        let pendingInviteId = null;
+        
+        function init() {
+            loadReceivedInvites();
+            loadSentInvites();
+        }
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.invite-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.invite-list').forEach(l => l.classList.remove('active'));
+            
+            event.target.closest('.invite-tab').classList.add('active');
+            document.getElementById(tab + '-list').classList.add('active');
+        }
+        
+        async function loadReceivedInvites() {
+            try {
+                const res = await api.getReceivedInvites();
+                const listEl = document.getElementById('received-list');
+                
+                if (res.success && res.data.length > 0) {
+                    const pendingCount = res.data.filter(i => i.status === 'pending').length;
+                    if (pendingCount > 0) {
+                        document.getElementById('received-badge').style.display = 'inline';
+                    }
+                    
+                    listEl.innerHTML = res.data.map(invite => renderInviteCard(invite, 'received')).join('');
+                } else {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <div class="empty-text">暂无收到的邀请</div>
+                            <div class="empty-hint">去匹配页面寻找伙伴吧</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-text">加载失败</div>
+                    </div>
+                `;
+            }
+        }
+        
+        async function loadSentInvites() {
+            try {
+                const res = await api.getSentInvites();
+                const listEl = document.getElementById('sent-list');
+                
+                if (res.success && res.data.length > 0) {
+                    listEl.innerHTML = res.data.map(invite => renderInviteCard(invite, 'sent')).join('');
+                } else {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📤</div>
+                            <div class="empty-text">暂无发出的邀请</div>
+                            <div class="empty-hint">主动向感兴趣的人发起邀请吧</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-text">加载失败</div>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderInviteCard(invite, type) {
+            const typeLabels = {
+                study: '学习搭子',
+                kaoyan: '考研搭子',
+                friend: '兴趣交友',
+                love: '异性恋爱'
+            };
+            
+            const statusLabels = {
+                pending: '待处理',
+                accepted: '已接受',
+                rejected: '已拒绝'
+            };
+            
+            let actionsHtml = '';
+            if (type === 'received' && invite.status === 'pending') {
+                actionsHtml = `
+                    <div class="invite-actions">
+                        <button class="btn btn-secondary" onclick="showRejectModal('${invite.id}')">拒绝</button>
+                        <button class="btn btn-primary" onclick="showAcceptModal('${invite.id}')">接受</button>
+                    </div>
+                `;
+            } else if (type === 'sent' && invite.status === 'pending') {
+                actionsHtml = `
+                    <div class="invite-status pending">等待对方回应</div>
+                `;
+            } else {
+                actionsHtml = `
+                    <div class="invite-status ${invite.status}">${statusLabels[invite.status]}</div>
+                `;
+            }
+            
+            return `
+                <div class="invite-card">
+                    <div class="invite-card-header">
+                        <div class="invite-avatar">${invite.fromName ? invite.fromName[0] : '?'}</div>
+                        <div class="invite-info">
+                            <div class="invite-name">${invite.fromName}</div>
+                            <div class="invite-meta">${invite.fromCollege || ''} · ${formatTime(invite.time)}</div>
+                        </div>
+                        <span class="invite-type-badge ${invite.type}">${typeLabels[invite.type]}</span>
+                    </div>
+                    ${invite.message ? `<div class="invite-message">"${invite.message}"</div>` : ''}
+                    ${actionsHtml}
+                </div>
+            `;
+        }
+        
+        function showAcceptModal(inviteId) {
+            pendingAction = 'accept';
+            pendingInviteId = inviteId;
+            document.getElementById('modal-title').textContent = '接受邀请';
+            document.getElementById('modal-body').textContent = '接受后，你们将成为好友并可以开始聊天。确定要接受吗？';
+            document.getElementById('modal-confirm').className = 'modal-btn confirm';
+            document.getElementById('confirm-modal').classList.add('show');
+        }
+        
+        function showRejectModal(inviteId) {
+            pendingAction = 'reject';
+            pendingInviteId = inviteId;
+            document.getElementById('modal-title').textContent = '拒绝邀请';
+            document.getElementById('modal-body').textContent = '拒绝后对方不会收到通知，确定要拒绝吗？';
+            document.getElementById('modal-confirm').className = 'modal-btn danger';
+            document.getElementById('confirm-modal').classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('confirm-modal').classList.remove('show');
+            pendingAction = null;
+            pendingInviteId = null;
+        }
+        
+        async function confirmAction() {
+            if (!pendingAction || !pendingInviteId) return;
+            
+            try {
+                const res = await api.handleInvite(pendingInviteId, pendingAction);
+                if (res.success) {
+                    showToast(pendingAction === 'accept' ? '已接受邀请' : '已拒绝邀请');
+                    closeModal();
+                    loadReceivedInvites();
+                } else {
+                    showToast(res.message || '操作失败');
+                }
+            } catch (e) {
+                showToast('网络错误');
+            }
+        }
+        
+        function formatTime(time) {
+            if (!time) return '';
+            const date = new Date(time);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+            
+            return date.toLocaleDateString();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

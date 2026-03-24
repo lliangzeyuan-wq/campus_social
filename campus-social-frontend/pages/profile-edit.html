@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>完善资料 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .edit-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .edit-header h1 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .edit-progress {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        
+        .edit-progress-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .edit-progress-dot.active {
+            background: white;
+            width: 1.5rem;
+            border-radius: 0.25rem;
+        }
+        
+        .edit-content {
+            padding: 1.25rem 1rem;
+            padding-bottom: 6rem;
+        }
+        
+        .edit-section {
+            display: none;
+        }
+        
+        .edit-section.active {
+            display: block;
+        }
+        
+        .edit-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .edit-section-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .avatar-upload {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .avatar-preview {
+            width: 6rem;
+            height: 6rem;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            margin: 0 auto 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            border: 2px dashed var(--border-color);
+            overflow: hidden;
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-hint {
+            font-size: 0.8125rem;
+            color: var(--text-light);
+        }
+        
+        .bottom-actions {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.75rem;
+            z-index: 100;
+        }
+        
+        .bottom-actions .btn {
+            flex: 1;
+        }
+        
+        .interest-categories {
+            margin-top: 1rem;
+        }
+        
+        .interest-category {
+            margin-bottom: 1.25rem;
+        }
+        
+        .interest-category-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="edit-header">
+            <h1>完善个人资料</h1>
+            <div class="edit-progress">
+                <div class="edit-progress-dot active" data-step="1"></div>
+                <div class="edit-progress-dot" data-step="2"></div>
+                <div class="edit-progress-dot" data-step="3"></div>
+            </div>
+        </div>
+        
+        <div class="edit-content">
+            <!-- 第一步：基础信息 -->
+            <div class="edit-section active" data-section="1">
+                <div class="edit-section-title">基本信息</div>
+                <div class="edit-section-desc">让其他小伙伴更好地认识你</div>
+                
+                <div class="avatar-upload">
+                    <div class="avatar-preview" onclick="selectAvatar()">
+                        <span id="avatar-placeholder">📷</span>
+                        <img id="avatar-img" style="display: none;">
+                    </div>
+                    <div class="avatar-hint">点击上传头像（可选）</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">昵称 <span style="color: var(--danger-color);">*</span></label>
+                    <input type="text" class="form-input" id="nickname" placeholder="给自己起个好听的昵称" maxlength="12">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">学院 <span style="color: var(--danger-color);">*</span></label>
+                    <input type="text" class="form-input" id="college" placeholder="例如：计算机学院" maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">专业 <span style="color: var(--danger-color);">*</span></label>
+                    <input type="text" class="form-input" id="major" placeholder="例如：软件工程" maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">年级</label>
+                    <select class="form-select" id="grade">
+                        <option value="">请选择</option>
+                        <option value="大一">大一</option>
+                        <option value="大二">大二</option>
+                        <option value="大三">大三</option>
+                        <option value="大四">大四</option>
+                        <option value="研一">研一</option>
+                        <option value="研二">研二</option>
+                        <option value="研三">研三</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 第二步：学习/考研信息 -->
+            <div class="edit-section" data-section="2" id="study-section">
+                <div class="edit-section-title">学习偏好</div>
+                <div class="edit-section-desc">帮助我们为你匹配更合适的学习伙伴</div>
+                
+                <div class="form-group">
+                    <label class="form-label">常去自习地点</label>
+                    <div class="tag-select">
+                        <span class="tag-option" data-location="图书馆">图书馆</span>
+                        <span class="tag-option" data-location="教学楼">教学楼</span>
+                        <span class="tag-option" data-location="自习室">自习室</span>
+                        <span class="tag-option" data-location="宿舍">宿舍</span>
+                        <span class="tag-option" data-location="咖啡厅">咖啡厅</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">学习时间段（可多选）</label>
+                    <div class="tag-select">
+                        <span class="tag-option" data-time="早晨">早晨 6-9点</span>
+                        <span class="tag-option" data-time="上午">上午 9-12点</span>
+                        <span class="tag-option" data-time="下午">下午 2-6点</span>
+                        <span class="tag-option" data-time="晚上">晚上 7-11点</span>
+                    </div>
+                </div>
+                
+                <div id="kaoyan-fields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">目标院校</label>
+                        <input type="text" class="form-input" id="target-school" placeholder="例如：清华大学" maxlength="30">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">备考科目（可多选）</label>
+                        <div class="tag-select">
+                            <span class="tag-option" data-subject="政治">政治</span>
+                            <span class="tag-option" data-subject="英语">英语</span>
+                            <span class="tag-option" data-subject="数学">数学</span>
+                            <span class="tag-option" data-subject="专业课">专业课</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">备考阶段</label>
+                        <select class="form-select" id="kaoyan-stage">
+                            <option value="">请选择</option>
+                            <option value="基础阶段">基础阶段</option>
+                            <option value="强化阶段">强化阶段</option>
+                            <option value="冲刺阶段">冲刺阶段</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">个人简介</label>
+                    <textarea class="form-textarea" id="bio" placeholder="介绍一下自己，让别人更了解你..." maxlength="200"></textarea>
+                    <p class="form-hint">还可以输入 <span id="bio-count">200</span> 字</p>
+                </div>
+            </div>
+            
+            <!-- 第三步：兴趣/恋爱信息 -->
+            <div class="edit-section" data-section="3" id="social-section">
+                <div class="edit-section-title">兴趣标签</div>
+                <div class="edit-section-desc">选择你感兴趣的内容（可多选）</div>
+                
+                <div class="interest-categories">
+                    <div class="interest-category">
+                        <div class="interest-category-title">🏃 运动健身</div>
+                        <div class="tag-select">
+                            <span class="tag-option" data-interest="跑步">跑步</span>
+                            <span class="tag-option" data-interest="篮球">篮球</span>
+                            <span class="tag-option" data-interest="羽毛球">羽毛球</span>
+                            <span class="tag-option" data-interest="游泳">游泳</span>
+                            <span class="tag-option" data-interest="健身">健身</span>
+                            <span class="tag-option" data-interest="瑜伽">瑜伽</span>
+                        </div>
+                    </div>
+                    
+                    <div class="interest-category">
+                        <div class="interest-category-title">🎮 娱乐游戏</div>
+                        <div class="tag-select">
+                            <span class="tag-option" data-interest="王者">王者荣耀</span>
+                            <span class="tag-option" data-interest="吃鸡">和平精英</span>
+                            <span class="tag-option" data-interest="原神">原神</span>
+                            <span class="tag-option" data-interest="桌游">桌游</span>
+                            <span class="tag-option" data-interest="剧本杀">剧本杀</span>
+                            <span class="tag-option" data-interest="K歌">K歌</span>
+                        </div>
+                    </div>
+                    
+                    <div class="interest-category">
+                        <div class="interest-category-title">📖 文化艺术</div>
+                        <div class="tag-select">
+                            <span class="tag-option" data-interest="阅读">阅读</span>
+                            <span class="tag-option" data-interest="电影">电影</span>
+                            <span class="tag-option" data-interest="音乐">音乐</span>
+                            <span class="tag-option" data-interest="摄影">摄影</span>
+                            <span class="tag-option" data-interest="绘画">绘画</span>
+                            <span class="tag-option" data-interest="写作">写作</span>
+                        </div>
+                    </div>
+                    
+                    <div class="interest-category">
+                        <div class="interest-category-title">🔬 学习技能</div>
+                        <div class="tag-select">
+                            <span class="tag-option" data-interest="编程">编程</span>
+                            <span class="tag-option" data-interest="外语">外语</span>
+                            <span class="tag-option" data-interest="乐器">乐器</span>
+                            <span class="tag-option" data-interest="剪辑">视频剪辑</span>
+                            <span class="tag-option" data-interest="设计">设计</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">性格标签</label>
+                    <div class="tag-select">
+                        <span class="tag-option" data-personality="开朗">开朗外向</span>
+                        <span class="tag-option" data-personality="内向">内向安静</span>
+                        <span class="tag-option" data-personality="幽默">幽默风趣</span>
+                        <span class="tag-option" data-personality="沉稳">沉稳踏实</span>
+                        <span class="tag-option" data-personality="细心">细心体贴</span>
+                        <span class="tag-option" data-personality="直率">直率坦诚</span>
+                    </div>
+                </div>
+                
+                <div id="love-fields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">期待的TA</label>
+                        <textarea class="form-textarea" id="ideal-partner" placeholder="描述一下你理想的另一半..." maxlength="100"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部按钮 -->
+        <div class="bottom-actions">
+            <button class="btn btn-secondary" id="prev-btn" onclick="prevStep()" style="display: none;">上一步</button>
+            <button class="btn btn-primary" id="next-btn" onclick="nextStep()">下一步</button>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        checkLogin();
+        
+        let currentStep = 1;
+        const totalSteps = 3;
+        let purpose = 'study';
+        
+        // 获取交友目的
+        const urlParams = new URLSearchParams(window.location.search);
+        purpose = urlParams.get('purpose') || localStorage.getItem('currentPurpose') || 'study';
+        
+        // 初始化
+        function init() {
+            updateStep();
+            updateFields();
+            
+            // 字数统计
+            document.getElementById('bio').addEventListener('input', function() {
+                document.getElementById('bio-count').textContent = 200 - this.value.length;
+            });
+        }
+        
+        // 更新步骤显示
+        function updateStep() {
+            document.querySelectorAll('.edit-section').forEach(section => {
+                section.classList.toggle('active', parseInt(section.dataset.section) === currentStep);
+            });
+            
+            document.querySelectorAll('.edit-progress-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index < currentStep);
+            });
+            
+            document.getElementById('prev-btn').style.display = currentStep > 1 ? 'block' : 'none';
+            document.getElementById('next-btn').textContent = currentStep === totalSteps ? '完成' : '下一步';
+        }
+        
+        // 根据目的更新字段
+        function updateFields() {
+            const studySection = document.getElementById('study-section');
+            const socialSection = document.getElementById('social-section');
+            const kaoyanFields = document.getElementById('kaoyan-fields');
+            const loveFields = document.getElementById('love-fields');
+            
+            if (purpose === 'study') {
+                kaoyanFields.style.display = 'none';
+                loveFields.style.display = 'none';
+            } else if (purpose === 'kaoyan') {
+                kaoyanFields.style.display = 'block';
+                loveFields.style.display = 'none';
+            } else if (purpose === 'friend') {
+                studySection.style.display = 'none';
+                kaoyanFields.style.display = 'none';
+                loveFields.style.display = 'none';
+                // 调整步骤
+                if (currentStep === 2) {
+                    document.querySelector('[data-section="2"]').style.display = 'none';
+                }
+            } else if (purpose === 'love') {
+                studySection.style.display = 'none';
+                kaoyanFields.style.display = 'none';
+                loveFields.style.display = 'block';
+                if (currentStep === 2) {
+                    document.querySelector('[data-section="2"]').style.display = 'none';
+                }
+            }
+        }
+        
+        function nextStep() {
+            if (!validateCurrentStep()) return;
+            
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStep();
+            } else {
+                submitProfile();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStep();
+            }
+        }
+        
+        function validateCurrentStep() {
+            if (currentStep === 1) {
+                const nickname = document.getElementById('nickname').value.trim();
+                const college = document.getElementById('college').value.trim();
+                const major = document.getElementById('major').value.trim();
+                
+                if (!nickname) {
+                    showToast('请填写昵称');
+                    return false;
+                }
+                if (!college) {
+                    showToast('请填写学院');
+                    return false;
+                }
+                if (!major) {
+                    showToast('请填写专业');
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        async function submitProfile() {
+            const profile = collectProfileData();
+            
+            try {
+                const res = await api.updateProfile(profile);
+                if (res.success) {
+                    showToast('资料保存成功');
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                    userInfo.profileCompleted = true;
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    
+                    setTimeout(() => {
+                        window.location.href = 'match.html?type=' + purpose;
+                    }, 1000);
+                } else {
+                    showToast(res.message || '保存失败');
+                }
+            } catch (e) {
+                showToast('网络错误');
+            }
+        }
+        
+        function collectProfileData() {
+            const locations = [];
+            document.querySelectorAll('[data-location].selected').forEach(el => {
+                locations.push(el.dataset.location);
+            });
+            
+            const times = [];
+            document.querySelectorAll('[data-time].selected').forEach(el => {
+                times.push(el.dataset.time);
+            });
+            
+            const subjects = [];
+            document.querySelectorAll('[data-subject].selected').forEach(el => {
+                subjects.push(el.dataset.subject);
+            });
+            
+            const interests = [];
+            document.querySelectorAll('[data-interest].selected').forEach(el => {
+                interests.push(el.dataset.interest);
+            });
+            
+            const personalities = [];
+            document.querySelectorAll('[data-personality].selected').forEach(el => {
+                personalities.push(el.dataset.personality);
+            });
+            
+            return {
+                nickname: document.getElementById('nickname').value.trim(),
+                college: document.getElementById('college').value.trim(),
+                major: document.getElementById('major').value.trim(),
+                grade: document.getElementById('grade').value,
+                locations,
+                times,
+                targetSchool: document.getElementById('target-school')?.value.trim() || '',
+                subjects,
+                stage: document.getElementById('kaoyan-stage')?.value || '',
+                bio: document.getElementById('bio').value.trim(),
+                interests,
+                personalities,
+                idealPartner: document.getElementById('ideal-partner')?.value.trim() || '',
+                purpose
+            };
+        }
+        
+        function selectAvatar() {
+            showToast('头像上传功能开发中');
+        }
+        
+        // 标签选择
+        document.querySelectorAll('.tag-option').forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+        
+        init();
+    </script>
+</body>
+</html>

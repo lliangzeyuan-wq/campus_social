@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>消息 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .msg-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .msg-header h1 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .msg-tabs {
+            display: flex;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .msg-tab {
+            flex: 1;
+            padding: 0.875rem;
+            text-align: center;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .msg-tab.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .msg-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            right: 25%;
+            height: 2px;
+            background: var(--primary-color);
+        }
+        
+        .msg-content {
+            padding-bottom: 5rem;
+        }
+        
+        .msg-list {
+            display: none;
+        }
+        
+        .msg-list.active {
+            display: block;
+        }
+        
+        .msg-item {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .msg-item:active {
+            background: var(--bg-secondary);
+        }
+        
+        .msg-item.unread .msg-avatar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0.625rem;
+            height: 0.625rem;
+            background: var(--danger-color);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+        
+        .msg-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .msg-info {
+            flex: 1;
+            margin-left: 0.875rem;
+            min-width: 0;
+        }
+        
+        .msg-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        
+        .msg-name {
+            font-weight: 500;
+            font-size: 0.9375rem;
+        }
+        
+        .msg-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+        
+        .msg-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .msg-preview {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+        
+        .msg-unread {
+            min-width: 1.125rem;
+            height: 1.125rem;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.6875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.5rem;
+            padding: 0 0.375rem;
+        }
+        
+        .msg-type-badge {
+            display: inline-block;
+            padding: 0.125rem 0.375rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            margin-left: 0.5rem;
+        }
+        
+        .msg-type-badge.study { background: rgba(34, 197, 94, 0.1); color: var(--success-color); }
+        .msg-type-badge.kaoyan { background: rgba(99, 102, 241, 0.1); color: var(--primary-color); }
+        .msg-type-badge.friend { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+        .msg-type-badge.love { background: rgba(236, 72, 153, 0.1); color: var(--secondary-color); }
+        
+        .system-msg-item {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .system-msg-title {
+            font-weight: 500;
+            font-size: 0.9375rem;
+            margin-bottom: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .system-msg-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        
+        .system-msg-content {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-left: 2rem;
+        }
+        
+        .system-msg-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-left: 2rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="msg-header">
+            <h1>消息</h1>
+        </div>
+        
+        <div class="msg-tabs">
+            <div class="msg-tab active" onclick="switchTab('chat')">
+                聊天消息
+                <span id="chat-unread-badge" style="display: none;"></span>
+            </div>
+            <div class="msg-tab" onclick="switchTab('system')">
+                系统通知
+                <span id="system-unread-badge" style="display: none;"></span>
+            </div>
+        </div>
+        
+        <div class="msg-content">
+            <!-- 聊天列表 -->
+            <div class="msg-list active" id="chat-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+            
+            <!-- 系统通知 -->
+            <div class="msg-list" id="system-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <span>🏠</span>
+                <span>首页</span>
+            </a>
+            <a href="match.html" class="nav-item">
+                <span>🔍</span>
+                <span>匹配</span>
+            </a>
+            <a href="messages.html" class="nav-item active">
+                <span>💬</span>
+                <span>消息</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <span>👤</span>
+                <span>我的</span>
+            </a>
+        </nav>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        checkLogin();
+        
+        let currentTab = 'chat';
+        
+        function init() {
+            loadChatList();
+            loadSystemMessages();
+            
+            // 定时刷新
+            setInterval(() => {
+                if (currentTab === 'chat') {
+                    loadChatList();
+                }
+            }, 30000);
+        }
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.msg-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.msg-list').forEach(l => l.classList.remove('active'));
+            
+            event.target.closest('.msg-tab').classList.add('active');
+            document.getElementById(tab + '-list').classList.add('active');
+        }
+        
+        async function loadChatList() {
+            try {
+                const res = await api.getChatList();
+                const listEl = document.getElementById('chat-list');
+                
+                if (res.success && res.data.length > 0) {
+                    let unreadCount = 0;
+                    listEl.innerHTML = res.data.map(chat => {
+                        if (chat.unread > 0) unreadCount += chat.unread;
+                        return `
+                            <div class="msg-item ${chat.unread > 0 ? 'unread' : ''}" onclick="openChat('${chat.userId}', '${chat.name}')">
+                                <div class="msg-avatar">${chat.name ? chat.name[0] : '?'}</div>
+                                <div class="msg-info">
+                                    <div class="msg-top">
+                                        <div class="msg-name">
+                                            ${chat.name}
+                                            ${chat.type ? `<span class="msg-type-badge ${chat.type}">${getTypeLabel(chat.type)}</span>` : ''}
+                                        </div>
+                                        <div class="msg-time">${formatTime(chat.time)}</div>
+                                    </div>
+                                    <div class="msg-bottom">
+                                        <div class="msg-preview">${chat.lastMessage || '暂无消息'}</div>
+                                        ${chat.unread > 0 ? `<div class="msg-unread">${chat.unread}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    if (unreadCount > 0) {
+                        document.getElementById('chat-unread-badge').style.display = 'inline';
+                    }
+                } else {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">💬</div>
+                            <div class="empty-text">暂无聊天消息</div>
+                            <div class="empty-hint">去匹配页面找到伙伴开始聊天吧</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.log('加载聊天列表失败');
+            }
+        }
+        
+        async function loadSystemMessages() {
+            try {
+                const res = await api.getSystemMessages();
+                const listEl = document.getElementById('system-list');
+                
+                if (res.success && res.data.length > 0) {
+                    listEl.innerHTML = res.data.map(msg => `
+                        <div class="system-msg-item">
+                            <div class="system-msg-title">
+                                <div class="system-msg-icon">📢</div>
+                                ${msg.title}
+                            </div>
+                            <div class="system-msg-content">${msg.content}</div>
+                            <div class="system-msg-time">${formatTime(msg.time)}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <div class="empty-text">暂无系统通知</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.log('加载系统消息失败');
+            }
+        }
+        
+        function openChat(userId, name) {
+            window.location.href = 'chat.html?userId=' + userId + '&name=' + encodeURIComponent(name);
+        }
+        
+        function getTypeLabel(type) {
+            const labels = {
+                study: '学习',
+                kaoyan: '考研',
+                friend: '交友',
+                love: '恋爱'
+            };
+            return labels[type] || '';
+        }
+        
+        function formatTime(time) {
+            if (!time) return '';
+            const date = new Date(time);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+            
+            return date.toLocaleDateString();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

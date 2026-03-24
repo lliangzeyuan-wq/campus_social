@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>选择交友目的 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .purpose-page {
+            min-height: 100vh;
+            background: var(--bg-secondary);
+        }
+        
+        .purpose-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        
+        .purpose-header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .purpose-header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+        
+        .purpose-content {
+            padding: 1.5rem 1rem;
+        }
+        
+        .purpose-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .purpose-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .purpose-card:hover,
+        .purpose-card:active {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .purpose-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+        
+        .purpose-card.study .purpose-icon { background: rgba(34, 197, 94, 0.1); }
+        .purpose-card.kaoyan .purpose-icon { background: rgba(99, 102, 241, 0.1); }
+        .purpose-card.friend .purpose-icon { background: rgba(245, 158, 11, 0.1); }
+        .purpose-card.love .purpose-icon { background: rgba(236, 72, 153, 0.1); }
+        
+        .purpose-info {
+            flex: 1;
+        }
+        
+        .purpose-title {
+            font-weight: 600;
+            font-size: 1.0625rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+        
+        .purpose-desc {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+        
+        .purpose-arrow {
+            color: var(--text-light);
+            font-size: 1.25rem;
+        }
+        
+        .purpose-tip {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: var(--radius-lg);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .purpose-tip-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+        
+        .purpose-tip-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="purpose-page">
+            <div class="purpose-header">
+                <h1>你想找什么伙伴？</h1>
+                <p>选择你的交友目的，我们将为你精准匹配</p>
+            </div>
+            
+            <div class="purpose-content">
+                <div class="purpose-grid">
+                    <div class="purpose-card study" onclick="selectPurpose('study')">
+                        <div class="purpose-icon">📚</div>
+                        <div class="purpose-info">
+                            <div class="purpose-title">学习搭子</div>
+                            <div class="purpose-desc">一起自习、互相监督、共同进步</div>
+                        </div>
+                        <div class="purpose-arrow">›</div>
+                    </div>
+                    
+                    <div class="purpose-card kaoyan" onclick="selectPurpose('kaoyan')">
+                        <div class="purpose-icon">🎯</div>
+                        <div class="purpose-info">
+                            <div class="purpose-title">考研搭子</div>
+                            <div class="purpose-desc">考研路上不孤单，目标一致共奋斗</div>
+                        </div>
+                        <div class="purpose-arrow">›</div>
+                    </div>
+                    
+                    <div class="purpose-card friend" onclick="selectPurpose('friend')">
+                        <div class="purpose-icon">🤝</div>
+                        <div class="purpose-info">
+                            <div class="purpose-title">同性交友</div>
+                            <div class="purpose-desc">兴趣相投，结交志同道合的朋友</div>
+                        </div>
+                        <div class="purpose-arrow">›</div>
+                    </div>
+                    
+                    <div class="purpose-card love" onclick="selectPurpose('love')">
+                        <div class="purpose-icon">💕</div>
+                        <div class="purpose-info">
+                            <div class="purpose-title">异性恋爱</div>
+                            <div class="purpose-desc">寻找心动的TA，开启校园恋爱</div>
+                        </div>
+                        <div class="purpose-arrow">›</div>
+                    </div>
+                </div>
+                
+                <div class="purpose-tip">
+                    <div class="purpose-tip-title">💡 小贴士</div>
+                    <div class="purpose-tip-text">
+                        选择后可以在个人中心随时切换交友目的。完善个人资料可以提高匹配成功率哦！
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        // 检查登录状态
+        checkLogin();
+        
+        function selectPurpose(purpose) {
+            // 保存选择的交友目的
+            localStorage.setItem('currentPurpose', purpose);
+            
+            // 根据目的跳转到不同的资料完善页面
+            const purposeNames = {
+                'study': '学习搭子',
+                'kaoyan': '考研搭子',
+                'friend': '同性交友',
+                'love': '异性恋爱'
+            };
+            
+            showToast('已选择：' + purposeNames[purpose]);
+            
+            // 检查是否需要完善资料
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            if (!userInfo.profileCompleted) {
+                // 新用户，需要完善资料
+                setTimeout(() => {
+                    window.location.href = 'profile-edit.html?purpose=' + purpose;
+                }, 500);
+            } else {
+                // 老用户，直接跳转到匹配页面
+                setTimeout(() => {
+                    window.location.href = 'match.html?type=' + purpose;
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

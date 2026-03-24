@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智能匹配 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .match-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .match-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .match-header h1 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .back-btn {
+            width: 2rem;
+            height: 2rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .filter-btn {
+            width: 2rem;
+            height: 2rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .match-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            scrollbar-width: none;
+        }
+        
+        .match-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .match-tab {
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: var(--radius-xl);
+            color: white;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .match-tab.active {
+            background: white;
+            color: var(--primary-color);
+        }
+        
+        .match-content {
+            padding: 1rem;
+            padding-bottom: 5rem;
+        }
+        
+        .match-user-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+        
+        .match-user-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .match-user-avatar {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .match-user-info {
+            flex: 1;
+        }
+        
+        .match-user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .match-user-meta {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+        
+        .match-score-badge {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-xl);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .match-user-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .match-user-detail {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .match-user-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+        }
+        
+        .match-user-detail-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .match-user-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .match-user-actions .btn {
+            flex: 1;
+        }
+        
+        .loading-more {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+        
+        .filter-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .filter-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .filter-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            padding: 1.25rem;
+            max-width: 480px;
+            margin: 0 auto;
+            transform: translateY(100%);
+            transition: var(--transition);
+        }
+        
+        .filter-modal.show .filter-content {
+            transform: translateY(0);
+        }
+        
+        .filter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+        
+        .filter-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .filter-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        
+        .filter-actions .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="match-header">
+            <div class="match-header-top">
+                <button class="back-btn" onclick="history.back()">‹</button>
+                <h1>智能匹配</h1>
+                <button class="filter-btn" onclick="showFilter()">⚙️</button>
+            </div>
+            <div class="match-tabs">
+                <button class="match-tab" data-type="study" onclick="switchTab('study')">📚 学习搭子</button>
+                <button class="match-tab" data-type="kaoyan" onclick="switchTab('kaoyan')">🎯 考研搭子</button>
+                <button class="match-tab" data-type="friend" onclick="switchTab('friend')">🤝 同性交友</button>
+                <button class="match-tab" data-type="love" onclick="switchTab('love')">💕 异性恋爱</button>
+            </div>
+        </div>
+        
+        <div class="match-content" id="match-list">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+        
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <span>🏠</span>
+                <span>首页</span>
+            </a>
+            <a href="match.html" class="nav-item active">
+                <span>🔍</span>
+                <span>匹配</span>
+            </a>
+            <a href="messages.html" class="nav-item">
+                <span>💬</span>
+                <span>消息</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <span>👤</span>
+                <span>我的</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- 筛选弹窗 -->
+    <div class="filter-modal" id="filter-modal">
+        <div class="filter-content">
+            <div class="filter-header">
+                <div class="filter-title">筛选条件</div>
+                <button class="filter-close" onclick="hideFilter()">×</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">性别</label>
+                <div class="tag-select">
+                    <span class="tag-option selected" data-filter-gender="all">全部</span>
+                    <span class="tag-option" data-filter-gender="male">男生</span>
+                    <span class="tag-option" data-filter-gender="female">女生</span>
+                </div>
+            </div>
+            
+            <div class="form-group" id="location-filter">
+                <label class="form-label">常去地点</label>
+                <div class="tag-select">
+                    <span class="tag-option selected" data-location="all">全部</span>
+                    <span class="tag-option" data-location="library">图书馆</span>
+                    <span class="tag-option" data-location="classroom">教学楼</span>
+                    <span class="tag-option" data-location="canteen">食堂</span>
+                    <span class="tag-option" data-location="dorm">宿舍区</span>
+                </div>
+            </div>
+            
+            <div class="form-group" id="time-filter" style="display: none;">
+                <label class="form-label">学习时间段</label>
+                <div class="tag-select">
+                    <span class="tag-option selected" data-time="all">全部</span>
+                    <span class="tag-option" data-time="morning">早上</span>
+                    <span class="tag-option" data-time="afternoon">下午</span>
+                    <span class="tag-option" data-time="evening">晚上</span>
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button class="btn btn-secondary" onclick="resetFilter()">重置</button>
+                <button class="btn btn-primary" onclick="applyFilter()">应用</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        checkLogin();
+        
+        let currentType = 'study';
+        let filterParams = {
+            gender: 'all',
+            location: 'all',
+            time: 'all'
+        };
+        
+        // 从URL获取类型
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeFromUrl = urlParams.get('type');
+        if (typeFromUrl) {
+            currentType = typeFromUrl;
+            localStorage.setItem('currentPurpose', currentType);
+        } else {
+            const savedPurpose = localStorage.getItem('currentPurpose');
+            if (savedPurpose) {
+                currentType = savedPurpose;
+            }
+        }
+        
+        // 初始化
+        function init() {
+            updateActiveTab();
+            updateFilterVisibility();
+            loadMatches();
+        }
+        
+        // 更新选中标签
+        function updateActiveTab() {
+            document.querySelectorAll('.match-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === currentType);
+            });
+        }
+        
+        // 更新筛选显示
+        function updateFilterVisibility() {
+            const locationFilter = document.getElementById('location-filter');
+            const timeFilter = document.getElementById('time-filter');
+            
+            if (currentType === 'study' || currentType === 'kaoyan') {
+                locationFilter.style.display = 'block';
+                timeFilter.style.display = 'block';
+            } else {
+                locationFilter.style.display = 'none';
+                timeFilter.style.display = 'none';
+            }
+        }
+        
+        // 切换标签
+        function switchTab(type) {
+            currentType = type;
+            localStorage.setItem('currentPurpose', type);
+            updateActiveTab();
+            updateFilterVisibility();
+            loadMatches();
+        }
+        
+        // 加载匹配列表
+        async function loadMatches() {
+            const listEl = document.getElementById('match-list');
+            listEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+            
+            try {
+                const res = await api.getMatches(currentType, filterParams);
+                if (res.success && res.data.length > 0) {
+                    renderMatchList(res.data);
+                } else {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <div class="empty-text">暂无匹配推荐</div>
+                            <div class="empty-hint">完善个人资料可以提高匹配率哦</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-text">加载失败</div>
+                        <div class="empty-hint">请检查网络连接后重试</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // 渲染匹配列表
+        function renderMatchList(users) {
+            const listEl = document.getElementById('match-list');
+            
+            const typeConfig = {
+                study: { scoreLabel: '学习匹配度', tags: ['学习时段', '专业'] },
+                kaoyan: { scoreLabel: '考研匹配度', tags: ['目标院校', '备考科目'] },
+                friend: { scoreLabel: '兴趣匹配度', tags: ['兴趣爱好', '性格'] },
+                love: { scoreLabel: '缘分指数', tags: ['兴趣爱好', '性格'] }
+            };
+            
+            const config = typeConfig[currentType];
+            
+            listEl.innerHTML = users.map(user => `
+                <div class="match-user-card">
+                    <div class="match-user-header">
+                        <div class="match-user-avatar">${user.name ? user.name[0] : '?'}</div>
+                        <div class="match-user-info">
+                            <div class="match-user-name">
+                                ${user.name}
+                                <span style="color: ${user.gender === 'male' ? '#3b82f6' : '#ec4899'};">${user.gender === 'male' ? '♂' : '♀'}</span>
+                            </div>
+                            <div class="match-user-meta">${user.college || ''} · ${user.major || ''}</div>
+                        </div>
+                        <div class="match-score-badge">${user.matchScore}%</div>
+                    </div>
+                    
+                    <div class="match-user-tags">
+                        ${(user.tags || []).map(tag => `<span class="tag tag-primary">${tag}</span>`).join('')}
+                    </div>
+                    
+                    <div class="match-user-detail">
+                        ${user.location ? `<div class="match-user-detail-item">📍 ${user.location}</div>` : ''}
+                        ${user.studyTime ? `<div class="match-user-detail-item">⏰ ${user.studyTime}</div>` : ''}
+                        ${user.targetSchool ? `<div class="match-user-detail-item">🎯 ${user.targetSchool}</div>` : ''}
+                        ${user.interests ? `<div class="match-user-detail-item">❤️ ${user.interests}</div>` : ''}
+                    </div>
+                    
+                    <div class="match-user-actions">
+                        <button class="btn btn-outline btn-sm" onclick="viewProfile('${user.id}')">查看资料</button>
+                        <button class="btn btn-primary btn-sm" onclick="sendInvite('${user.id}')">发起邀请</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 发送邀请
+        async function sendInvite(userId) {
+            try {
+                const res = await api.sendInvite(userId, currentType);
+                if (res.success) {
+                    showToast('邀请已发送');
+                } else {
+                    showToast(res.message || '发送失败');
+                }
+            } catch (e) {
+                showToast('网络错误');
+            }
+        }
+        
+        // 查看资料
+        function viewProfile(userId) {
+            window.location.href = 'user-profile.html?id=' + userId;
+        }
+        
+        // 筛选相关
+        function showFilter() {
+            document.getElementById('filter-modal').classList.add('show');
+        }
+        
+        function hideFilter() {
+            document.getElementById('filter-modal').classList.remove('show');
+        }
+        
+        function resetFilter() {
+            document.querySelectorAll('.tag-option').forEach(tag => tag.classList.remove('selected'));
+            document.querySelectorAll('[data-filter-gender="all"]').forEach(tag => tag.classList.add('selected'));
+            document.querySelectorAll('[data-location="all"]').forEach(tag => tag.classList.add('selected'));
+            document.querySelectorAll('[data-time="all"]').forEach(tag => tag.classList.add('selected'));
+        }
+        
+        function applyFilter() {
+            const genderEl = document.querySelector('[data-filter-gender].selected');
+            const locationEl = document.querySelector('[data-location].selected');
+            const timeEl = document.querySelector('[data-time].selected');
+            
+            filterParams = {
+                gender: genderEl ? genderEl.dataset.filterGender : 'all',
+                location: locationEl ? locationEl.dataset.location : 'all',
+                time: timeEl ? timeEl.dataset.time : 'all'
+            };
+            
+            hideFilter();
+            loadMatches();
+        }
+        
+        // 标签选择
+        document.querySelectorAll('.tag-option').forEach(tag => {
+            tag.addEventListener('click', function() {
+                const parent = this.parentElement;
+                parent.querySelectorAll('.tag-option').forEach(t => t.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        
+        init();
+    </script>
+</body>
+</html>

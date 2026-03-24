@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>校园社交匹配系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-logo-icon {
+            width: 5rem;
+            height: 5rem;
+            background: white;
+            border-radius: var(--radius-xl);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .login-logo h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .login-logo p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .login-form {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .login-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .login-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: var(--transition);
+        }
+        
+        .login-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .login-form-content {
+            display: none;
+        }
+        
+        .login-form-content.active {
+            display: block;
+        }
+        
+        .social-login {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        .social-login-divider {
+            position: relative;
+            margin: 1rem 0;
+        }
+        
+        .social-login-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-color);
+        }
+        
+        .social-login-divider span {
+            position: relative;
+            background: white;
+            padding: 0 0.75rem;
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="login-container">
+            <div class="login-logo">
+                <div class="login-logo-icon">🎓</div>
+                <h1>校园社交匹配</h1>
+                <p>找到志同道合的校园伙伴</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="login-tabs">
+                    <div class="login-tab active" data-tab="login">登录</div>
+                    <div class="login-tab" data-tab="register">注册</div>
+                </div>
+                
+                <!-- 登录表单 -->
+                <div class="login-form-content active" id="login-form">
+                    <div class="form-group">
+                        <label class="form-label">学号</label>
+                        <input type="text" class="form-input" id="login-student-id" placeholder="请输入学号" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-input" id="login-password" placeholder="请输入密码" maxlength="20">
+                    </div>
+                    <button class="btn btn-primary" onclick="handleLogin()">登录</button>
+                    <p class="form-hint" style="text-align: center; margin-top: 1rem;">
+                        忘记密码？<a href="#" style="color: var(--primary-color);">联系管理员</a>
+                    </p>
+                </div>
+                
+                <!-- 注册表单 -->
+                <div class="login-form-content" id="register-form">
+                    <div class="form-group">
+                        <label class="form-label">学号 <span style="color: var(--danger-color);">*</span></label>
+                        <input type="text" class="form-input" id="reg-student-id" placeholder="请输入学号" maxlength="20">
+                        <p class="form-hint">学号将作为您的唯一标识</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">姓名 <span style="color: var(--danger-color);">*</span></label>
+                        <input type="text" class="form-input" id="reg-name" placeholder="请输入真实姓名" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">性别 <span style="color: var(--danger-color);">*</span></label>
+                        <div class="tag-select">
+                            <span class="tag-option" data-gender="male">男</span>
+                            <span class="tag-option" data-gender="female">女</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">密码 <span style="color: var(--danger-color);">*</span></label>
+                        <input type="password" class="form-input" id="reg-password" placeholder="设置密码（6-20位）" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">确认密码 <span style="color: var(--danger-color);">*</span></label>
+                        <input type="password" class="form-input" id="reg-confirm-password" placeholder="再次输入密码" maxlength="20">
+                    </div>
+                    <button class="btn btn-primary" onclick="handleRegister()">注册</button>
+                </div>
+            </div>
+            
+            <p style="text-align: center; color: rgba(255,255,255,0.6); font-size: 0.75rem; margin-top: 1.5rem;">
+                仅限在校学生使用 | 安全认证
+            </p>
+        </div>
+    </div>
+    
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
+    
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        // 标签页切换
+        document.querySelectorAll('.login-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.login-form-content').forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab + '-form').classList.add('active');
+            });
+        });
+        
+        // 性别选择
+        document.querySelectorAll('[data-gender]').forEach(tag => {
+            tag.addEventListener('click', function() {
+                document.querySelectorAll('[data-gender]').forEach(t => t.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        
+        // 登录处理
+        async function handleLogin() {
+            const studentId = document.getElementById('login-student-id').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            if (!studentId) {
+                showToast('请输入学号');
+                return;
+            }
+            if (!password) {
+                showToast('请输入密码');
+                return;
+            }
+            
+            try {
+                const res = await api.login(studentId, password);
+                if (res.success) {
+                    showToast('登录成功');
+                    localStorage.setItem('userInfo', JSON.stringify(res.data));
+                    setTimeout(() => {
+                        window.location.href = 'pages/purpose.html';
+                    }, 500);
+                } else {
+                    showToast(res.message || '登录失败');
+                }
+            } catch (err) {
+                showToast('网络错误，请稍后重试');
+            }
+        }
+        
+        // 注册处理
+        async function handleRegister() {
+            const studentId = document.getElementById('reg-student-id').value.trim();
+            const name = document.getElementById('reg-name').value.trim();
+            const genderEl = document.querySelector('[data-gender].selected');
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            
+            if (!studentId) {
+                showToast('请输入学号');
+                return;
+            }
+            if (!name) {
+                showToast('请输入姓名');
+                return;
+            }
+            if (!genderEl) {
+                showToast('请选择性别');
+                return;
+            }
+            if (!password || password.length < 6) {
+                showToast('密码至少6位');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showToast('两次密码输入不一致');
+                return;
+            }
+            
+            try {
+                const res = await api.register({
+                    studentId,
+                    name,
+                    gender: genderEl.dataset.gender,
+                    password
+                });
+                if (res.success) {
+                    showToast('注册成功，请登录');
+                    document.querySelector('[data-tab="login"]').click();
+                } else {
+                    showToast(res.message || '注册失败');
+                }
+            } catch (err) {
+                showToast('网络错误，请稍后重试');
+            }
+        }
+        
+        // 检查是否已登录
+        const userInfo = localStorage.getItem('userInfo');
+        if (userInfo) {
+            window.location.href = 'pages/home.html';
+        }
+    </script>
+</body>
+</html>
