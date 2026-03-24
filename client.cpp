@@ -25,15 +25,11 @@ void clear_input_after_cin() {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-int cfd_global; // 全局socket，避免递归传参
+int cfd_global;
 
 void send_cmd(const char* cmd) {
-    char buf[1024];
     write(cfd_global, cmd, strlen(cmd));
     write(cfd_global, "\n", 1);
-    memset(buf, 0, sizeof(buf));
-    read(cfd_global, buf, sizeof(buf) - 1);
-    std::cout << "📌 " << buf << std::endl;
 }
 
 void handle_mode_fill(int mode_to_fill) {
@@ -76,11 +72,43 @@ void handle_mode_fill(int mode_to_fill) {
         snprintf(cmd, sizeof(cmd), "LOVE:%s|%s", g, i);
         send_cmd(cmd);
     }
+}
 
-    // 填写完成后直接切换模式
-    snprintf(cmd, sizeof(cmd), "SWITCH:%d", mode_to_fill);
+void handle_exp_fill(int mode) {
+    std::cout << "\n📝 请填写期望匹配对象信息：\n";
+    char cmd[2048];
+    if (mode == 1) {
+        char s[50], g[20];
+        std::cout << "期望科目：";
+        std::cin.getline(s, 50);
+        std::cout << "期望年级：";
+        std::cin.getline(g, 20);
+        snprintf(cmd, sizeof(cmd), "EXP:%s|%s", s, g);
+    }
+    else if (mode == 2) {
+        char m[50], s[50];
+        std::cout << "期望专业：";
+        std::cin.getline(m, 50);
+        std::cout << "期望院校：";
+        std::cin.getline(s, 50);
+        snprintf(cmd, sizeof(cmd), "EXP:%s|%s", m, s);
+    }
+    else if (mode == 3) {
+        char h[50], p[20];
+        std::cout << "期望兴趣：";
+        std::cin.getline(h, 50);
+        std::cout << "期望性格：";
+        std::cin.getline(p, 20);
+        snprintf(cmd, sizeof(cmd), "EXP:%s|%s", h, p);
+    }
+    else if (mode == 4) {
+        char g[10];
+        std::cout << "期望性别：";
+        std::cin.getline(g, 10);
+        snprintf(cmd, sizeof(cmd), "EXP:%s", g);
+    }
     send_cmd(cmd);
-    std::cout << "✅ 信息填写完成，模式切换成功！\n";
+    std::cout << "✅ 期望匹配对象信息已保存！\n";
 }
 
 int main() {
@@ -95,19 +123,17 @@ int main() {
 
     cfd = socket(AF_INET, SOCK_STREAM, 0);
     if (cfd == -1) sys_err("socket创建失败");
-    cfd_global = cfd; // 赋值给全局变量
+    cfd_global = cfd;
 
     if (connect(cfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
         sys_err("连接服务器失败");
 
-    // 登录逻辑
     std::cout << "请输入你的学号：";
     std::cin >> buf;
     write(cfd, buf, strlen(buf));
     std::cout << "✅ 学号 " << buf << " 登录成功！" << std::endl;
     clear_input_after_cin();
 
-    // 接收登录返回的信息
     memset(buf, 0, sizeof(buf));
     n = read(cfd, buf, sizeof(buf) - 1);
     buf[n] = '\0';
@@ -133,7 +159,6 @@ int main() {
         line = strtok(NULL, "\n");
     }
 
-    // 处理未读好友申请
     if (pending_cnt > 0) {
         std::cout << "\n📢 你有 " << pending_cnt << " 条未处理的好友申请：\n";
         for (int i = 0; i < pending_cnt; i++) {
@@ -161,7 +186,6 @@ int main() {
         }
     }
 
-    // 新用户首次填写信息
     int mode_choice = user_mode;
     if (!has_info) {
         while (true) {
@@ -183,6 +207,9 @@ int main() {
 
             char cmd[100];
             snprintf(cmd, sizeof(cmd), "MODE:%d", mode_choice);
+            send_cmd(cmd);
+            // 修复：发送SWITCH激活模式，解决重复填写
+            snprintf(cmd, sizeof(cmd), "SWITCH:%d", mode_choice);
             send_cmd(cmd);
             break;
         }
@@ -226,6 +253,7 @@ int main() {
             send_cmd(cmd);
         }
 
+        // 修复：恢复期望匹配对象填写功能
         std::cout << "\n请填写期望匹配对象信息：\n";
         if (mode_choice == 1) {
             char s[50], g[20];
@@ -266,7 +294,6 @@ int main() {
         std::cout << "ℹ️ 检测到你已填写过个人信息，直接进入功能菜单\n";
     }
 
-    // 功能菜单
     std::cout << "=====================================================\n";
     std::cout << "               🔥 功能使用说明 🔥                \n";
     std::cout << " 1. 智能匹配：输入 MATCH                          \n";
@@ -279,13 +306,13 @@ int main() {
     std::cout << " 7. 查询所有信息：输入 INFO                        \n";
     std::cout << " 8. 修改信息：输入 UPDATE                          \n";
     std::cout << " 9. 切换模式：输入 SWITCH                          \n";
-    std::cout << " 10. 退出客户端：quit                              \n";
+    std::cout << " 10. 填写期望匹配对象：输入 EXP                    \n";
+    std::cout << " 11. 退出客户端：quit                              \n";
     std::cout << "=====================================================\n\n";
 
     std::cout << "请输入指令：";
     std::cout.flush();
 
-    // select 循环
     fd_set fds;
     int max_fd = (cfd > STDIN_FILENO) ? cfd : STDIN_FILENO;
 
@@ -297,7 +324,6 @@ int main() {
         int ret = select(max_fd + 1, &fds, NULL, NULL, NULL);
         if (ret < 0) break;
 
-        // 处理服务器消息
         if (FD_ISSET(cfd, &fds)) {
             memset(buf, 0, sizeof(buf));
             n = read(cfd, buf, sizeof(buf) - 1);
@@ -307,21 +333,24 @@ int main() {
             }
             buf[n] = '\0';
 
-            // 处理未填写模式的提示
+            char* p = strchr(buf, '\n');
+            if (p) *p = '\0';
+            p = strchr(buf, '\r');
+            if (p) *p = '\0';
+
             if (strstr(buf, "NEED_FILL:") == buf) {
-                int mode_to_fill = atoi(buf + 9);
+                int mode_to_fill = atoi(buf + 10);
                 handle_mode_fill(mode_to_fill);
-                std::cout << "请输入指令：";
-                std::cout.flush();
-                continue;
+            }
+            else if (strlen(buf) > 0) {
+                std::cout << "\n📢 系统通知：" << buf << std::endl;
             }
 
-            std::cout << "\n📢 系统通知：\n" << buf << std::endl;
             std::cout << "请输入指令：";
             std::cout.flush();
+            continue;
         }
 
-        // 处理用户输入
         if (FD_ISSET(STDIN_FILENO, &fds)) {
             memset(buf, 0, sizeof(buf));
             std::cin.getline(buf, sizeof(buf));
@@ -435,6 +464,14 @@ int main() {
                 char cmd[100];
                 snprintf(cmd, sizeof(cmd), "SWITCH:%d", s_choice);
                 send_cmd(cmd);
+            }
+            else if (strcmp(buf, "EXP") == 0) {
+                if (user_mode == MODE_NONE) {
+                    std::cout << "❌ 请先选择一个模式再填写期望信息！\n";
+                }
+                else {
+                    handle_exp_fill(user_mode);
+                }
             }
             else {
                 send_cmd(buf);

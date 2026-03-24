@@ -5,31 +5,23 @@
 #include <cstring>
 #include <dirent.h>
 
-// 【关键】包含公共头文件，使用标准数据结构
+// 【关键】包含公共头文件和数据库头文件
 #include "common.h"
+#include "db.h"
 
-// 从文件加载用户
-int load_users(User* all_users, int max_size) {
-    FILE* fp = fopen(USER_FILE, "rb");
-    if (!fp) return 0;
-    int count = 0;
-    while (fread(&all_users[count], sizeof(User), 1, fp) == 1 && count < max_size) count++;
-    fclose(fp);
-    return count;
-}
+// ===================== 替换后的函数（数据库操作） =====================
 
-// 保存用户到文件
-void save_users(User* all_users, int count) {
-    FILE* fp = fopen(USER_FILE, "wb");
-    if (!fp) return;
-    fwrite(all_users, sizeof(User), count, fp);
-    fclose(fp);
-}
-
-// 1. 查看所有用户（已适配标准结构）
+// 1. 查看所有用户（已适配数据库）
 void list_users() {
     User all_users[MAX_USER];
-    int all_count = load_users(all_users, MAX_USER);
+    int all_count = 0;
+
+    // 【关键修改】从数据库加载所有用户
+    if (!db_load_all_users(all_users, all_count)) {
+        printf("❌ 加载用户失败！\n");
+        return;
+    }
+
     if (all_count == 0) {
         printf("❌ 暂无注册用户！\n");
         return;
@@ -60,12 +52,36 @@ void list_users() {
         if (strlen(u->love_gender) > 0)
             printf("   [恋爱] 性别：%s | 简介：%.30s...\n", u->love_gender, u->love_intro);
 
-        printf("   好友数：%d | 待处理申请：%d/%d\n", u->friend_cnt, u->app_cnt, MAX_APPS);
         printf("-----------------------------------------------------\n");
     }
 }
 
-// 辅助：加载指定文件
+// 2. 删除用户（已适配数据库）
+void delete_user(const char* id) {
+    // 【关键修改】调用数据库软删除
+    if (db_delete_user(id)) {
+        printf("✅ 已删除用户：%s\n", id);
+    }
+    else {
+        printf("❌ 未找到用户或删除失败：%s\n", id);
+    }
+}
+
+// 3. 清空用户（已适配数据库）
+void clear_users() {
+    // 【关键修改】SQL 批量软删除
+    char sql[] = "UPDATE user SET is_deleted=1 WHERE is_deleted=0";
+    if (mysql_query(g_mysql_conn, sql) != 0) {
+        fprintf(stderr, "[MySQL] 清空用户失败：%s\n", mysql_error(g_mysql_conn));
+        printf("❌ 清空失败！\n");
+    }
+    else {
+        printf("✅ 已清空所有数据！\n");
+    }
+}
+
+// ===================== 保留的备份功能（和数据库不冲突） =====================
+// 辅助：加载指定文件（保留，用于查看旧备份）
 int load_from_file(User* all_users, int max_size, const char* filename) {
     FILE* fp = fopen(filename, "rb");
     if (!fp) return 0;
@@ -75,7 +91,7 @@ int load_from_file(User* all_users, int max_size, const char* filename) {
     return count;
 }
 
-// 5. 查看指定备份
+// 5. 查看指定备份（保留）
 void view_backup() {
     char backup_name[100];
     printf("请输入备份文件名（例如：test.dat）：");
@@ -99,7 +115,7 @@ void view_backup() {
     printf("-----------------------------------------------------\n");
 }
 
-// 6. 查看所有备份
+// 6. 查看所有备份（保留）
 void list_backups() {
     DIR* dir;
     struct dirent* ent;
@@ -120,7 +136,7 @@ void list_backups() {
     printf("-----------------------------------------------------\n");
 }
 
-// 7. 重命名备份
+// 7. 重命名备份（保留）
 void rename_backup() {
     char old_name[100], new_name[100], temp_name[100];
     printf("请输入要重命名的旧备份文件名：");
@@ -142,10 +158,10 @@ void rename_backup() {
     else printf("❌ 重命名失败！\n");
 }
 
-// 4. 备份数据
+// 4. 备份数据（保留，备份旧的 .dat 文件）
 void backup_users() {
     FILE* src = fopen(USER_FILE, "rb");
-    if (!src) { printf("❌ 无数据可备份！\n"); return; }
+    if (!src) { printf("❌ 无旧的 .dat 数据可备份！\n"); return; }
 
     int choice;
     char backup_filename[100] = { 0 };
@@ -175,30 +191,13 @@ void backup_users() {
     printf("✅ 已备份到：%s\n", backup_filename);
 }
 
-// 2. 删除用户
-void delete_user(const char* id) {
-    User all_users[MAX_USER];
-    int all_count = load_users(all_users, MAX_USER);
-    int found = 0;
-    for (int i = 0; i < all_count; i++) {
-        if (strcmp(all_users[i].id, id) == 0) {
-            found = 1;
-            for (int j = i; j < all_count - 1; j++) all_users[j] = all_users[j + 1];
-            all_count--; break;
-        }
-    }
-    if (!found) printf("❌ 未找到用户：%s\n", id);
-    else { save_users(all_users, all_count); printf("✅ 已删除用户：%s\n", id); }
-}
-
-// 3. 清空用户
-void clear_users() {
-    FILE* fp = fopen(USER_FILE, "wb");
-    if (fp) fclose(fp);
-    printf("✅ 已清空所有数据！\n");
-}
-
+// ===================== 主函数（已适配数据库） =====================
 int main() {
+    // 【关键修改】初始化数据库
+    if (!init_mysql()) {
+        return 1;
+    }
+
     int choice;
     while (1) {
         printf("\n=====================================================\n");
@@ -207,7 +206,7 @@ int main() {
         printf("1. 查看所有用户\n");
         printf("2. 删除指定用户\n");
         printf("3. 清空所有用户\n");
-        printf("4. 备份数据\n");
+        printf("4. 备份旧的 .dat 数据\n");
         printf("5. 查看指定备份\n");
         printf("6. 查看所有备份\n");
         printf("7. 重命名备份\n");
@@ -223,9 +222,15 @@ int main() {
         case 5: view_backup(); break;
         case 6: list_backups(); break;
         case 7: rename_backup(); break;
-        case 8: return 0;
+        case 8:
+            // 【关键修改】关闭数据库
+            close_mysql();
+            return 0;
         default: printf("❌ 无效选项！\n");
         }
     }
+
+    // 【关键修改】关闭数据库
+    close_mysql();
     return 0;
 }

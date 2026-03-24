@@ -1,25 +1,16 @@
-CC = g++
-CFLAGS = -Wall -g
-LDFLAGS = -lpthread
+CXXFLAGS = -Wall -std=c++11
+LDFLAGS = -lmysqlclient -lpthread
 
-# all: server client
 all: server client manage_users
 
-server: server.o
-	$(CC) $(CFLAGS) server.o -o server $(LDFLAGS)
+server: server.cpp common.h db.h db.cpp
+	g++ $(CXXFLAGS) -o server server.cpp db.cpp $(LDFLAGS)
 
-client: client.o
-	$(CC) $(CFLAGS) client.o -o client $(LDFLAGS)
+client: client.cpp common.h
+	g++ $(CXXFLAGS) -o client client.cpp $(LDFLAGS)
 
-
-manage_users: manage_users.o
-	$(CC) $(CFLAGS) manage_users.o -o manage_users
-
-%.o: %.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# clean:
-# 	rm -f *.o server client
+manage_users: manage_users.cpp common.h db.h db.cpp
+	g++ $(CXXFLAGS) -o manage_users manage_users.cpp db.cpp $(LDFLAGS)
 
 clean:
-	rm -f *.o server client manage_users
+	rm -f server client manage_users
