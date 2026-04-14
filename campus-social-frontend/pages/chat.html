@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>聊天 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 0;
+        }
+
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid var(--primary-light);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mobile-container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <button class="back-btn" onclick="goBack()">‹</button>
+                <div class="user-avatar" id="chat-avatar">?</div>
+                <div class="chat-header-info">
+                    <div class="chat-header-name" id="chat-name">加载中...</div>
+                    <div class="chat-header-status" id="chat-status">在线</div>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="message-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="message-input" placeholder="输入消息..." maxlength="500">
+                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        function checkLogin() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast('请先登录');
+                setTimeout(() => window.location.href = '../index.html', 1000);
+                return false;
+            }
+            return true;
+        }
+
+        if (!checkLogin()) {
+            document.getElementById('message-list').innerHTML = '<div class="empty-state">请先登录</div>';
+            throw new Error('未登录');
+        }
+
+        // 🔥 核心修复1：强化参数获取，缺失自动跳转
+        const urlParams = new URLSearchParams(window.location.search);
+        let targetUserId = String(urlParams.get('userId') || '').trim();
+        let targetUserName = decodeURIComponent(urlParams.get('name') || '未知用户').trim();
+
+        // 🔥 核心修复2：参数缺失自动回退到好友列表
+        if (!targetUserId) {
+            showToast('参数错误，将返回好友列表');
+            setTimeout(() => window.location.href = 'messages.html', 1000);
+            throw new Error('目标用户ID为空');
+        }
+
+        let currentUserId = String(localStorage.getItem('userId') || '').trim();
+        if (!currentUserId) {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                currentUserId = String(userInfo.id || '').trim();
+            } catch (e) {
+                console.error('解析userInfo失败', e);
+                currentUserId = '';
+            }
+        }
+
+        if (!currentUserId) {
+            showToast('登录信息异常，请重新登录');
+            setTimeout(() => window.location.href = '../index.html', 1000);
+            throw new Error('当前用户ID为空');
+        }
+
+        console.log("【聊天页】当前用户ID：", currentUserId, "，目标用户ID：", targetUserId);
+
+        function removeLoading() {
+            const listEl = document.getElementById('message-list');
+            const loadingEl = listEl.querySelector('.loading');
+            if (loadingEl) loadingEl.remove();
+        }
+
+        function init() {
+            document.getElementById('chat-name').textContent = targetUserName;
+            document.getElementById('chat-avatar').textContent = targetUserName[0] || '?';
+
+            loadMessages();
+
+            document.getElementById('message-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            setInterval(loadMessages, 5000);
+        }
+
+        async function loadMessages() {
+            try {
+                console.log("【聊天页】开始加载消息...");
+                const res = await api.getMessages(targetUserId);
+                console.log("【聊天页】加载消息返回：", res);
+
+                removeLoading();
+
+                if (res.success && Array.isArray(res.data)) {
+                    messages = res.data;
+                    renderMessages();
+                } else {
+                    console.warn("加载消息失败，保留本地消息");
+                    if (messages.length === 0) renderEmptyState();
+                    else renderMessages();
+                }
+            } catch (e) {
+                console.error('【聊天页】加载消息异常：', e);
+                removeLoading();
+                showToast('加载消息失败，请检查网络');
+                if (messages.length === 0) renderEmptyState();
+                else renderMessages();
+            }
+        }
+
+        function renderEmptyState() {
+            const listEl = document.getElementById('message-list');
+            listEl.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">💬</div>
+                    <div class="empty-text">开始聊天吧</div>
+                    <div class="empty-hint">打个招呼，认识一下新朋友</div>
+                </div>
+            `;
+        }
+
+        let messages = [];
+        function renderMessages() {
+            const listEl = document.getElementById('message-list');
+            removeLoading();
+
+            if (messages.length === 0) {
+                renderEmptyState();
+                return;
+            }
+
+            listEl.innerHTML = messages.map(msg => {
+                const msgFromId = String(msg.fromId || msg.from_id || '').trim();
+                const isSent = msgFromId === currentUserId;
+                return `
+                    <div class="chat-message ${isSent ? 'sent' : 'received'}">
+                        <div class="chat-message-content">${escapeHtml(msg.content)}</div>
+                        <div class="chat-message-time">${formatTime(msg.time || msg.send_time)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+
+            if (!content) return;
+            input.value = '';
+
+            const tempMsg = {
+                fromId: currentUserId,
+                content: content,
+                time: new Date().toISOString()
+            };
+            messages.push(tempMsg);
+            renderMessages();
+
+            try {
+                console.log("【聊天页】发送消息：", targetUserId, content);
+                const res = await api.sendMessage(targetUserId, content);
+
+                if (!res.success) {
+                    showToast('发送失败：' + (res.message || '未知错误'));
+                    messages.pop();
+                    renderMessages();
+                } else {
+                    await loadMessages();
+                }
+            } catch (e) {
+                console.error('【聊天页】发送消息异常：', e);
+                showToast('网络错误，发送失败');
+                messages.pop();
+                renderMessages();
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'messages.html';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTime(time) {
+            if (!time) return '';
+            try {
+                const date = new Date(time);
+                return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return time;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

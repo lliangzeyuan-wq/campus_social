@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的 - 校园社交</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2rem;
+            height: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+
+        .invite-btn {
+            position: absolute;
+            right: 6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: none;
+        }
+
+        .profile-avatar {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 auto 0.75rem;
+        }
+
+        .profile-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            text-align: center;
+        }
+
+        .profile-status {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .profile-content {
+            padding: 1rem;
+            padding-bottom: 5rem;
+        }
+
+        .profile-section {
+            background: var(--bg-primary);
+            margin-bottom: 1rem;
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+        }
+
+        .profile-section-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-item-label {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .profile-item-value {
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .logout-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            cursor: pointer;
+            display: block;
+            box-sizing: border-box;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mobile-container">
+        <div class="profile-header">
+            <button class="back-btn" onclick="history.back()">‹</button>
+            <div class="profile-avatar" id="profile-avatar">?</div>
+            <div class="profile-name" id="profile-name">加载中...</div>
+            <div class="profile-status" id="profile-status">--</div>
+            <button class="invite-btn" id="inviteBtn" onclick="sendInvite()">发起邀请</button>
+            <button class="edit-btn" onclick="goToEdit()">编辑</button>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-section">
+                <div class="profile-section-title">基本信息</div>
+                <div class="profile-item">
+                    <span class="profile-item-label">性别</span>
+                    <span class="profile-item-value" id="profile-gender">--</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">年级</span>
+                    <span class="profile-item-value" id="profile-grade">--</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">专业</span>
+                    <span class="profile-item-value" id="profile-major">--</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">学院</span>
+                    <span class="profile-item-value" id="profile-college">--</span>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-section-title">学习偏好</div>
+                <div class="profile-item">
+                    <span class="profile-item-label">常去地点</span>
+                    <span class="profile-item-value" id="profile-location">--</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">学习时间</span>
+                    <span class="profile-item-value" id="profile-study-time">--</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">兴趣标签</span>
+                    <span class="profile-item-value" id="profile-tags">--</span>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-section-title">个人介绍</div>
+                <div class="profile-item-value" id="profile-bio">--</div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <span>🏠</span>
+                <span>首页</span>
+            </a>
+            <a href="match.html" class="nav-item">
+                <span>🔍</span>
+                <span>匹配</span>
+            </a>
+            <a href="messages.html" class="nav-item">
+                <span>💬</span>
+                <span>消息</span>
+            </a>
+            <a href="profile.html" class="nav-item active">
+                <span>👤</span>
+                <span>我的</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../js/utils.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '../index.html';
+        }
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        const targetUserId = getQueryParam('id');
+        const userId = targetUserId || localStorage.getItem('userId');
+        const localUserName = localStorage.getItem('userName');
+        const selfUserId = localStorage.getItem('userId');
+
+        function init() {
+            loadProfile();
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(`http://39.108.165.213:8080/api/profile/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                console.log("后端返回的完整数据：", result);
+                if (result.success && result.data) {
+                    const data = result.data;
+                    console.log("用户数据中的location字段：", data.location);
+
+                    const showName = data.name || localUserName || '用户';
+                    document.getElementById('profile-avatar').textContent = showName[0];
+                    document.getElementById('profile-name').textContent = showName;
+
+                    document.getElementById('profile-gender').textContent =
+                        data.gender === 'male' ? '男' :
+                            data.gender === 'female' ? '女' : '--';
+                    document.getElementById('profile-grade').textContent = data.grade || '--';
+                    document.getElementById('profile-major').textContent = data.major || '--';
+                    document.getElementById('profile-college').textContent = data.college || '--';
+
+                    // 🔥 100%修复：常去地点渲染，处理所有空值/异常
+                    const locationStr = data.location || '';
+                    const locationArr = locationStr.split(',')
+                        .map(item => item.trim())
+                        .filter(item => item && item !== 'undefined' && item !== 'null');
+                    console.log("拆分后的常去地点数组：", locationArr);
+                    document.getElementById('profile-location').textContent =
+                        locationArr.length > 0 ? locationArr.join('、') : '--';
+
+                    document.getElementById('profile-study-time').textContent =
+                        data.studyTime && data.studyTime.trim() ? data.studyTime : '--';
+
+                    const interestsStr = data.interests || '';
+                    const interestsArr = interestsStr.split(',')
+                        .map(item => item.trim())
+                        .filter(item => item && item !== 'undefined' && item !== 'null');
+                    document.getElementById('profile-tags').textContent =
+                        interestsArr.length > 0 ? interestsArr.join('、') : '--';
+
+                    document.getElementById('profile-bio').textContent = data.introduction || '--';
+
+                    document.getElementById('profile-status').textContent =
+                        (interestsArr.length > 0) && data.gender && data.major ? '资料已完善' : '请完善资料';
+
+                    const editBtn = document.querySelector('.edit-btn');
+                    const logoutBtn = document.querySelector('.logout-btn');
+                    const inviteBtn = document.getElementById('inviteBtn');
+                    if (targetUserId && targetUserId !== selfUserId) {
+                        editBtn.style.display = 'none';
+                        logoutBtn.style.display = 'none';
+                        inviteBtn.style.display = 'block';
+                    } else {
+                        inviteBtn.style.display = 'none';
+                    }
+                } else {
+                    throw new Error(result.message || '拉取资料失败');
+                }
+            } catch (e) {
+                console.error("拉取资料失败：", e);
+                showToast('拉取资料失败');
+                const showName = localUserName || '用户';
+                document.getElementById('profile-avatar').textContent = showName[0];
+                document.getElementById('profile-name').textContent = showName;
+                document.getElementById('profile-status').textContent = '请完善资料';
+            }
+        }
+
+        function goToEdit() {
+            window.location.href = 'profile-edit.html';
+        }
+
+        // 🔥 已修复：好友邀请参数错误
+        async function sendInvite() {
+            if (!targetUserId || targetUserId === "null") {
+                showToast("请从匹配页进入用户资料");
+                return;
+            }
+
+            try {
+                const res = await fetch('http://10.186.49.122:8080/api/invites', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ userId: targetUserId })
+                });
+                const data = await res.json();
+                showToast(data.message);
+            } catch (err) {
+                showToast('发送失败');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userName');
+            showToast('已退出登录');
+            setTimeout(() => {
+                window.location.href = '../index.html';
+            }, 800);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

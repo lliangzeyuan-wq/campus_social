@@ -1,0 +1,184 @@
+nohup: ignoring input
+223.160.237.254 - - [14/Apr/2026 08:45:08] "GET / HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 08:45:09] "GET /pages/purpose.html HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 08:45:09] code 404, message File not found
+223.160.237.254 - - [14/Apr/2026 08:45:09] "GET /favicon.ico HTTP/1.1" 404 -
+223.160.237.254 - - [14/Apr/2026 08:45:10] "GET /pages/match.html?type=study HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 08:45:11] "GET /pages/messages.html HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 08:45:18] code 404, message File not found
+223.160.237.254 - - [14/Apr/2026 08:45:18] "GET /favicon.ico HTTP/1.1" 404 -
+223.160.237.254 - - [14/Apr/2026 08:45:21] "GET /pages/profile.html HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 08:45:56] "GET /pages/match.html HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 08:46:08] code 404, message File not found
+223.160.237.254 - - [14/Apr/2026 08:46:08] "GET /favicon.ico HTTP/1.1" 404 -
+119.41.234.223 - - [14/Apr/2026 08:46:25] code 404, message File not found
+119.41.234.223 - - [14/Apr/2026 08:46:25] "GET /favicon.ico HTTP/1.1" 404 -
+223.160.237.254 - - [14/Apr/2026 08:46:31] code 404, message File not found
+223.160.237.254 - - [14/Apr/2026 08:46:31] "GET /favicon.ico HTTP/1.1" 404 -
+119.41.234.223 - - [14/Apr/2026 08:46:36] "GET /pages/purpose.html HTTP/1.1" 200 -
+119.41.234.223 - - [14/Apr/2026 08:46:42] "GET /pages/match.html?type=study HTTP/1.1" 200 -
+119.41.234.223 - - [14/Apr/2026 08:47:04] "GET /pages/profile.html HTTP/1.1" 200 -
+119.41.234.223 - - [14/Apr/2026 08:47:09] "GET /pages/profile-edit.html HTTP/1.1" 200 -
+119.41.234.223 - - [14/Apr/2026 08:47:15] "GET /pages/match.html HTTP/1.1" 200 -
+119.41.234.223 - - [14/Apr/2026 08:47:19] "GET /pages/home.html HTTP/1.1" 200 -
+223.160.237.254 - - [14/Apr/2026 08:47:30] code 404, message File not found
+223.160.237.254 - - [14/Apr/2026 08:47:30] "GET /favicon.ico HTTP/1.1" 404 -
+119.41.234.223 - - [14/Apr/2026 08:47:34] "GET /pages/match.html?type=kaoyan HTTP/1.1" 200 -
+119.41.234.223 - - [14/Apr/2026 08:47:38] "GET /pages/invites.html HTTP/1.1" 200 -
+223.160.237.254 - - [14/Apr/2026 08:48:45] code 404, message File not found
+223.160.237.254 - - [14/Apr/2026 08:48:45] "GET /favicon.ico HTTP/1.1" 404 -
+----------------------------------------
+Exception occurred during processing of request from ('119.41.234.223', 57084)
+----------------------------------------
+Exception occurred during processing of request from ('119.41.234.223', 57091)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/http/server.py", line 1304, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 401, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+  File "/usr/lib/python3.10/socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.10/http/server.py", line 1304, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+ConnectionResetError: [Errno 104] Connection reset by peer
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+----------------------------------------
+  File "/usr/lib/python3.10/http/server.py", line 401, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+  File "/usr/lib/python3.10/socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('39.144.69.199', 56961)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/http/server.py", line 1304, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 401, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+  File "/usr/lib/python3.10/socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+180.163.28.143 - - [14/Apr/2026 10:00:52] "GET / HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:00:55] "GET / HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:00:55] "GET /js/api.js HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:00:55] "GET /css/style.css HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:00:55] "GET /js/utils.js HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:00:55] code 404, message File not found
+111.55.160.29 - - [14/Apr/2026 10:00:55] "GET /favicon.ico HTTP/1.1" 404 -
+113.96.15.45 - - [14/Apr/2026 10:01:15] "GET / HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:01:32] "GET /pages/purpose.html HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:01:36] "GET /pages/match.html?type=study HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:01:52] "GET /pages/profile.html?id=20253004404 HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:01:55] "GET /pages/home.html HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:01:59] "GET /pages/messages.html HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:02:00] "GET /pages/profile.html HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:02:17] "GET /pages/profile-edit.html HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:03:37] "GET /pages/match.html HTTP/1.1" 200 -
+111.55.160.29 - - [14/Apr/2026 10:06:10] code 404, message File not found
+111.55.160.29 - - [14/Apr/2026 10:06:10] "GET /favicon.ico HTTP/1.1" 404 -
+111.55.160.29 - - [14/Apr/2026 10:06:19] "GET /pages/profile.html?id=jjjdj HTTP/1.1" 200 -
+223.160.237.254 - - [14/Apr/2026 10:52:25] "GET / HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:52:25] "GET /js/api.js HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:52:25] "GET /js/utils.js HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:52:25] "GET /css/style.css HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:52:26] "GET /pages/purpose.html HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:52:26] code 404, message File not found
+223.160.237.254 - - [14/Apr/2026 10:52:26] "GET /favicon.ico HTTP/1.1" 404 -
+223.160.237.254 - - [14/Apr/2026 10:52:27] "GET /pages/match.html?type=love HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:52:28] "GET /pages/messages.html HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:52:29] "GET /pages/profile.html HTTP/1.1" 304 -
+223.160.237.254 - - [14/Apr/2026 10:54:57] "GET /pages/home.html HTTP/1.1" 304 -
+106.55.200.233 - - [14/Apr/2026 12:23:10] "GET / HTTP/1.1" 200 -
+180.163.29.217 - - [14/Apr/2026 13:50:29] "GET / HTTP/1.1" 200 -
+113.96.15.38 - - [14/Apr/2026 13:50:30] "GET / HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:50:31] "GET / HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:50:31] "GET /css/style.css HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:50:31] "GET /js/api.js HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:50:31] "GET /js/utils.js HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:50:31] code 404, message File not found
+113.58.85.29 - - [14/Apr/2026 13:50:31] "GET /favicon.ico HTTP/1.1" 404 -
+113.58.85.29 - - [14/Apr/2026 13:51:17] "GET /pages/purpose.html HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:51:20] "GET /pages/match.html?type=study HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:51:41] "GET /pages/profile.html?id=20253004404 HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:51:51] "GET /pages/messages.html HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:51:53] "GET /pages/home.html HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:51:56] "GET /pages/match.html HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:52:26] "GET /pages/profile.html HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:52:29] "GET /pages/profile-edit.html HTTP/1.1" 200 -
+113.58.85.29 - - [14/Apr/2026 13:54:22] "GET /pages/profile.html?id=20253004399 HTTP/1.1" 200 -
+180.163.28.114 - - [14/Apr/2026 20:08:00] "GET / HTTP/1.1" 200 -
+117.88.127.73 - - [14/Apr/2026 20:08:00] "GET / HTTP/1.1" 200 -
+121.58.22.219 - - [14/Apr/2026 20:08:02] "GET / HTTP/1.1" 304 -
+121.58.22.219 - - [14/Apr/2026 20:08:02] "GET /css/style.css HTTP/1.1" 304 -
+121.58.22.219 - - [14/Apr/2026 20:08:02] "GET /js/api.js HTTP/1.1" 304 -
+121.58.22.219 - - [14/Apr/2026 20:08:02] "GET /js/utils.js HTTP/1.1" 304 -
+121.58.22.219 - - [14/Apr/2026 20:08:02] "GET /pages/purpose.html HTTP/1.1" 304 -
+121.58.22.219 - - [14/Apr/2026 20:08:02] code 404, message File not found
+121.58.22.219 - - [14/Apr/2026 20:08:02] "GET /favicon.ico HTTP/1.1" 404 -
+121.58.22.219 - - [14/Apr/2026 20:08:03] code 404, message File not found
+121.58.22.219 - - [14/Apr/2026 20:08:03] "GET /favicon.ico HTTP/1.1" 404 -
+121.58.22.219 - - [14/Apr/2026 20:08:07] "GET /pages/match.html?type=study HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('121.58.22.219', 6406)
+----------------------------------------
+Exception occurred during processing of request from ('121.58.22.219', 6402)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/http/server.py", line 1304, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 401, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.10/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+ConnectionResetError: [Errno 104] Connection reset by peer
+  File "/usr/lib/python3.10/http/server.py", line 1304, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+----------------------------------------
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 401, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+  File "/usr/lib/python3.10/socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
